@@ -6,6 +6,12 @@ namespace StockManagementApp.Models
 {
     public class StockContext : DbContext
     {
+        // Default constructor for migration tooling
+        public StockContext() { }
+        
+        // Constructor for dependency injection
+        public StockContext(DbContextOptions<StockContext> options) : base(options) { }
+        
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
@@ -15,12 +21,13 @@ namespace StockManagementApp.Models
         public DbSet<User> Users { get; set; }
         public DbSet<History> Histories { get; set; }
 
-       protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-{
-    if (!optionsBuilder.IsConfigured)
-    {
-optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=StockManagementDB;Trusted_Connection=True;TrustServerCertificate=True;");    }
-}
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=StockManagementDB;Trusted_Connection=True;TrustServerCertificate=True;");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,28 +36,53 @@ optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=StockManageme
             // Configure relationships and constraints
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Supplier)
-                .WithMany()
-                .HasForeignKey(p => p.SupplierId);
+                .WithMany(s => s.Products)
+                .HasForeignKey(p => p.SupplierId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.Client)
-                .WithMany()
-                .HasForeignKey(o => o.ClientId);
+                .WithMany(c => c.Orders)
+                .HasForeignKey(o => o.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Order)
-                .WithMany(o => o.Items)
-                .HasForeignKey(oi => oi.OrderId);
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Product)
                 .WithMany()
-                .HasForeignKey(oi => oi.ProductId);
+                .HasForeignKey(oi => oi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Delivery>()
                 .HasOne(d => d.Order)
+                .WithOne(o => o.Delivery)
+                .HasForeignKey<Delivery>(d => d.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<History>()
+                .HasOne(h => h.User)
                 .WithMany()
-                .HasForeignKey(d => d.OrderId);
+                .HasForeignKey(h => h.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Seed data for roles - Updated to remove Email and CreatedDate
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    UserId = 1,
+                    Username = "admin",
+                    Password = "admin123",
+                    FullName = "System Administrator",
+                    Role = "Administrator",
+                    IsActive = true,
+                }
+            );
         }
     }
 }

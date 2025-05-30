@@ -13,32 +13,25 @@ namespace StockManagementApp.Modules
         private void InitializeComponent()
         {
             this.dataGridViewSuppliers = new System.Windows.Forms.DataGridView();
-            this.btnAdd = new System.Windows.Forms.Button();
             this.btnEdit = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.btnSearch = new System.Windows.Forms.Button();
+            this.btnAdd = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSuppliers)).BeginInit();
             this.SuspendLayout();
-            // 
+            
             // dataGridViewSuppliers
-            // 
-            this.dataGridViewSuppliers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
+            //
+            this.dataGridViewSuppliers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridViewSuppliers.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridViewSuppliers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewSuppliers.Location = new System.Drawing.Point(20, 60);
             this.dataGridViewSuppliers.Name = "dataGridViewSuppliers";
-            this.dataGridViewSuppliers.Size = new System.Drawing.Size(740, 350);
+            this.dataGridViewSuppliers.ReadOnly = true;
+            this.dataGridViewSuppliers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dataGridViewSuppliers.Size = new System.Drawing.Size(760, 350);
             this.dataGridViewSuppliers.TabIndex = 0;
-            // 
-            // btnAdd
-            // 
-            this.btnAdd.Location = new System.Drawing.Point(20, 420);
-            this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(80, 30);
-            this.btnAdd.Text = "Add";
-            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
             // btnEdit
             // 
@@ -58,27 +51,40 @@ namespace StockManagementApp.Modules
             // 
             // txtSearch
             // 
-            this.txtSearch.Location = new System.Drawing.Point(320, 20);
+            this.txtSearch.Location = new System.Drawing.Point(20, 20);
             this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(200, 23);
+            this.txtSearch.Size = new System.Drawing.Size(250, 23);
+            this.txtSearch.TabIndex = 1;
             // 
             // btnSearch
             // 
-            this.btnSearch.Location = new System.Drawing.Point(530, 18);
+            this.btnSearch.Location = new System.Drawing.Point(280, 20);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(80, 27);
+            this.btnSearch.Size = new System.Drawing.Size(80, 23);
+            this.btnSearch.TabIndex = 2;
             this.btnSearch.Text = "Search";
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
+            // btnAdd
+            // 
+            this.btnAdd.Location = new System.Drawing.Point(370, 20);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(80, 23);
+            this.btnAdd.Text = "Add Supplier";
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
             // SuppliersControl
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dataGridViewSuppliers);
-            this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.btnEdit);
             this.Controls.Add(this.btnDelete);
             this.Controls.Add(this.txtSearch);
             this.Controls.Add(this.btnSearch);
-            this.Size = new System.Drawing.Size(780, 470);
+            this.Controls.Add(this.btnAdd);
+            this.Name = "SuppliersControl";
+            this.Size = new System.Drawing.Size(800, 470);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSuppliers)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

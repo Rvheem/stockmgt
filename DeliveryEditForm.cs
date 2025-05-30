@@ -18,13 +18,14 @@ namespace StockManagementApp.Modules
         private Button btnSave, btnCancel;
         private Label lblOrderDetails, lblOrderDate, lblClient, lblTotal;
         
-        private StockContext _context = new StockContext();
+        private StockContext _context;
 
         public DeliveryEditForm() : this(new Delivery { DeliveryDate = DateTime.Now }) { }
 
         public DeliveryEditForm(Delivery delivery)
         {
             Delivery = delivery;
+            _context = DbContextFactory.CreateContext();
             InitializeComponent();
             LoadOrders();
             
@@ -240,6 +241,15 @@ namespace StockManagementApp.Modules
                 MessageBox.Show($"Error saving delivery: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.DialogResult = DialogResult.None;
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

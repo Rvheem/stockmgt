@@ -10,14 +10,15 @@ public partial class Form1 : Form
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public User? CurrentUser { get; set; }
     
-    private ProductsControl productsControl;
-    private OrdersControl ordersControl;
-    private ClientsControl clientsControl;
-    private SuppliersControl suppliersControl;
-    private DeliveriesControl deliveriesControl;
-    private UsersControl usersControl;
-    private HistoryControl historyControl;
-    private Dashboard dashboardControl;
+    // Initialize with empty implementations to avoid null warnings
+    private ProductsControl productsControl = new();
+    private OrdersControl ordersControl = new();
+    private ClientsControl clientsControl = new();
+    private SuppliersControl suppliersControl = new();
+    private DeliveriesControl deliveriesControl = new();
+    private UsersControl usersControl = new();
+    private HistoryControl historyControl = new();
+    private Dashboard dashboardControl = new();
 
     public Form1()
     {
@@ -29,6 +30,9 @@ public partial class Form1 : Form
     {
         InitializeComponent();
         CurrentUser = user;
+        InitializeModules();
+        ShowModule("Dashboard");
+        this.Text = $"Stock Management System - Logged in as: {user.Username} ({user.Role})";
     }
 
     private void ShowLoginForm()
@@ -231,15 +235,18 @@ public partial class Form1 : Form
             // Log the logout action
             try
             {
-                using (var context = new StockContext())
+                if (CurrentUser != null)
                 {
-                    context.Histories.Add(new History
+                    using (var context = new StockContext())
                     {
-                        Action = "User logged out",
-                        Date = DateTime.Now,
-                        UserId = CurrentUser.UserId
-                    });
-                    context.SaveChanges();
+                        context.Histories.Add(new StockManagementApp.Models.History
+                        {
+                            Action = "User logged out",
+                            Date = DateTime.Now,
+                            UserId = CurrentUser.UserId
+                        });
+                        context.SaveChanges();
+                    }
                 }
             }
             catch (Exception ex)

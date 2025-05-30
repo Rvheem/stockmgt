@@ -11,13 +11,14 @@ namespace StockManagementApp.Modules
 {
     public partial class OrdersControl : UserControl
     {
-        private StockContext _context = new StockContext();
+        private StockContext _context;
         private PrintDocument printDocument = new PrintDocument();
         private Order currentPrintOrder;
 
         public OrdersControl()
         {
             InitializeComponent();
+            _context = DbContextFactory.CreateContext();
             LoadOrders();
             
             // Set up print document
@@ -28,7 +29,7 @@ namespace StockManagementApp.Modules
             {
                 var orders = _context.Orders
                     .Include(o => o.Client)
-                    .Include(o => o.Items)
+                    .Include(o => o.OrderItems)
                     .Where(o => search == "" || o.Client.Name.Contains(search) || o.OrderDate.ToString().Contains(search))
                     .Select(o => new
                     {
@@ -36,7 +37,7 @@ namespace StockManagementApp.Modules
                         o.OrderDate,
                         Client = o.Client.Name,
                         o.Total,
-                        ItemCount = o.Items.Count
+                        ItemCount = o.OrderItems.Count
                     })
                     .ToList();
                 dataGridViewOrders.DataSource = orders;
@@ -92,7 +93,7 @@ namespace StockManagementApp.Modules
                     {
                         // Load order items
                         _context.Entry(order)
-                            .Collection(o => o.Items)
+                            .Collection(o => o.OrderItems)
                             .Load();
                             
                         // Load client
@@ -136,11 +137,11 @@ namespace StockManagementApp.Modules
                         {
                             // Load order items
                             _context.Entry(order)
-                                .Collection(o => o.Items)
+                                .Collection(o => o.OrderItems)
                                 .Load();
                                 
                             // Return items to inventory
-                            foreach (var item in order.Items)
+                            foreach (var item in order.OrderItems)
                             {
                                 var product = _context.Products.Find(item.ProductId);
                                 if (product != null)
@@ -149,7 +150,7 @@ namespace StockManagementApp.Modules
                                 }
                             }
                               // Remove order items
-                            foreach (var item in order.Items.ToList())
+                            foreach (var item in order.OrderItems.ToList())
                             {
                                 _context.OrderItems.Remove(item);
                             }
@@ -189,14 +190,14 @@ namespace StockManagementApp.Modules
                     {
                         // Load order items and references
                         _context.Entry(order)
-                            .Collection(o => o.Items)
+                            .Collection(o => o.OrderItems)
                             .Load();
                             
                         _context.Entry(order)
                             .Reference(o => o.Client)
                             .Load();
                             
-                        foreach (var item in order.Items)
+                        foreach (var item in order.OrderItems)
                         {
                             _context.Entry(item)
                                 .Reference(i => i.Product)
@@ -378,6 +379,16 @@ namespace StockManagementApp.Modules
                 // Just log to console for now, don't disrupt the UI
                 System.Diagnostics.Debug.WriteLine($"Error logging action: {ex.Message}");
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+                printDocument?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

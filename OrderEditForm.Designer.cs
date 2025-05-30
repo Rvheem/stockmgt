@@ -20,15 +20,6 @@ namespace StockManagementApp.Modules
         private System.Windows.Forms.Label lblQuantity;
         private System.Windows.Forms.Label lblTotal;
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
         private void InitializeComponent()
         {
             this.cmbClient = new System.Windows.Forms.ComboBox();

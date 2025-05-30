@@ -11,48 +11,57 @@ static class Program
     /// </summary>
     [STAThread]
     static void Main()
-{
-    Application.EnableVisualStyles();
-    Application.SetCompatibleTextRenderingDefault(false);
-
-    // Ensure default admin user exists
-    EnsureDefaultAdminUser();
-
-    // To customize application configuration such as set high DPI settings or default font,
-    // see https://aka.ms/applicationconfiguration.
-    ApplicationConfiguration.Initialize();
-    
-    // Start with login form
-    using (var loginForm = new LoginForm())
     {
-        var result = loginForm.ShowDialog();
-        
-        // Only open the main form if login was successful
-        if (result == DialogResult.OK)
+        try
         {
-            Application.Run(new Form1(loginForm.User));
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            // Ensure default admin user exists
+            EnsureDefaultAdminUser();
+
+            // To customize application configuration such as set high DPI settings or default font,
+            // see https://aka.ms/applicationconfiguration.
+            ApplicationConfiguration.Initialize();
+            
+            // Start with login form
+            using (var loginForm = new LoginForm())
+            {
+                var result = loginForm.ShowDialog();
+                
+                // Only open the main form if login was successful
+                if (result == DialogResult.OK)
+                {
+                    Application.Run(new Form1(loginForm.User));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Fatal error: {ex.Message}\n{ex.StackTrace}", "Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Environment.Exit(1);
         }
     }
-}
 
     private static void EnsureDefaultAdminUser()
-{
-    using (var context = new StockManagementApp.Models.StockContext())
     {
-        // Check if admin user exists
-        if (!context.Users.Any(u => u.Username == "admin"))
+        using (var context = new StockManagementApp.Models.StockContext())
         {
-            context.Users.Add(new StockManagementApp.Models.User
+            // Check if admin user exists
+            if (!context.Users.Any(u => u.Username == "admin"))
             {
-                Username = "admin",
-                Password = "admin", // In production, hash this!
-                Role = "Administrator"
-            });
-            context.SaveChanges();
+                context.Users.Add(new StockManagementApp.Models.User
+                {
+                    Username = "admin",
+                    Password = "admin", // In production, hash this!
+                    Role = "Administrator"
+                });
+                context.SaveChanges();
+            }
         }
     }
-}
-      static void InitializeDatabase()
+
+    static void InitializeDatabase()
     {
         try 
         {

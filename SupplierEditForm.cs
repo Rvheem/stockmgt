@@ -1,78 +1,95 @@
 using System;
 using System.Windows.Forms;
 using StockManagementApp.Models;
-using System.ComponentModel;
 
-namespace StockManagementApp.Modules
+namespace StockManagementApp
 {
     public partial class SupplierEditForm : Form
     {
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Supplier Supplier { get; private set; }
+        private Supplier _supplier;
         private bool _isNewSupplier;
 
-        public SupplierEditForm(Supplier supplier = null)
+        public SupplierEditForm(Supplier? supplier = null)
         {
             InitializeComponent();
+            _isNewSupplier = supplier == null;
+            _supplier = supplier ?? new Supplier();
             
-            // Initialize with a new supplier if null was passed
-            Supplier = supplier ?? new Supplier();
-            
-            if (supplier == null)
+            if (!_isNewSupplier)
             {
-                // Create new supplier
-                _isNewSupplier = true;
-                this.Text = "Add New Supplier";
+                // Populate form with existing supplier data
+                txtName.Text = _supplier.Name;
+                txtContact.Text = _supplier.ContactPerson;
+                txtPhone.Text = _supplier.Phone;
+                txtEmail.Text = _supplier.Email;
+                txtAddress.Text = _supplier.Address;
+                
+                Text = "Edit Supplier";
             }
             else
             {
-                // Edit existing supplier
-                _isNewSupplier = false;
-                this.Text = "Edit Supplier";
-            }
-
-            // Populate the form with supplier data if editing
-            if (!_isNewSupplier)
-            {
-                txtName.Text = Supplier.Name;
-                txtPhone.Text = Supplier.Phone;
-                txtAddress.Text = Supplier.Address;
-                txtEmail.Text = Supplier.Email;
-                txtContactPerson.Text = Supplier.ContactPerson;
+                Text = "Add New Supplier";
             }
         }
 
+        public Supplier Supplier => _supplier;
+
         private void btnSave_Click(object sender, EventArgs e)
         {
-            try
+            if (ValidateInput())
             {
-                // Validate form inputs
-                if (string.IsNullOrWhiteSpace(txtName.Text))
+                _supplier.Name = txtName.Text.Trim();
+                _supplier.ContactPerson = txtContact.Text.Trim();
+                _supplier.Phone = txtPhone.Text.Trim();
+                _supplier.Email = txtEmail.Text.Trim();
+                _supplier.Address = txtAddress.Text.Trim();
+                _supplier.IsActive = true; // Ensure IsActive is set
+
+                if (_isNewSupplier)
                 {
-                    MessageBox.Show("Supplier name is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtName.Focus();
-                    return;
+                    _supplier.CreatedAt = DateTime.Now;
+                    // Code to save new supplier to database
+                    // DataHelper.AddSupplier(_supplier);
                 }
-
-                // Update the supplier object with form values
-                Supplier.Name = txtName.Text;
-                Supplier.Phone = txtPhone.Text;
-                Supplier.Address = txtAddress.Text;
-                Supplier.Email = txtEmail.Text;
-                Supplier.ContactPerson = txtContactPerson.Text;
-
+                else
+                {
+                    _supplier.UpdatedAt = DateTime.Now;
+                    // Code to update existing supplier in database
+                    // DataHelper.UpdateSupplier(_supplier);
+                }
+                
                 DialogResult = DialogResult.OK;
+                Close();
             }
-            catch (Exception ex)
+        }
+
+        private bool ValidateInput()
+        {
+            if (string.IsNullOrWhiteSpace(txtName.Text))
             {
-                MessageBox.Show($"Error saving supplier: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Supplier name is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtName.Focus();
+                return false;
             }
+            if (string.IsNullOrWhiteSpace(txtPhone.Text))
+            {
+                MessageBox.Show("Phone number is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtPhone.Focus();
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(txtAddress.Text))
+            {
+                MessageBox.Show("Address is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtAddress.Focus();
+                return false;
+            }
+            return true;
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }

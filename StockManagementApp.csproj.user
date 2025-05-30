@@ -4,5 +4,17 @@
         <Compile Update="Form1.cs">
             <SubType>Form</SubType>
         </Compile>
+        <Compile Update="LoginForm.cs">
+            <SubType>Form</SubType>
+        </Compile>
+        <Compile Update="Modules\*.cs">
+            <SubType>UserControl</SubType>
+        </Compile>
+        <Compile Update="*Control.cs">
+            <SubType>UserControl</SubType>
+        </Compile>
+        <Compile Update="*EditForm.cs">
+            <SubType>Form</SubType>
+        </Compile>
     </ItemGroup>
 </Project>

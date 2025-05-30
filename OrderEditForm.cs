@@ -9,61 +9,54 @@ namespace StockManagementApp.Modules
 {
     public partial class OrderEditForm : Form
     {
-        private StockContext _context = new StockContext();
+        private StockContext _context;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Order Order { get; private set; }
+        public Order? OrderToEdit { get; set; } = null;
         private bool _isNewOrder;
         private List<OrderItem> _orderItems = new List<OrderItem>();
         private BindingSource _bindingSource = new BindingSource();
-
-        public OrderEditForm(Order order = null)
+        public Order Order => OrderToEdit ?? new Order { OrderDate = DateTime.Now };
+        
+        public OrderEditForm()
         {
             InitializeComponent();
-            
-            // Initialize with a new order if null was passed
-            Order = order ?? new Order();
-            
+            _context = DbContextFactory.CreateContext();
+            _isNewOrder = true;
+            OrderToEdit = new Order { OrderDate = DateTime.Now };
+            InitializeOrderForm();
+        }
+
+        public OrderEditForm(Order? order)
+        {
+            InitializeComponent();
+            _context = DbContextFactory.CreateContext();
+            OrderToEdit = order ?? new Order { OrderDate = DateTime.Now };
+            _isNewOrder = order == null;
+            InitializeOrderForm();
+        }
+        
+        private void InitializeOrderForm()
+        {
             // Load clients for the dropdown
             LoadClients();
             
             // Load products for the dropdown
             LoadProducts();
             
-            if (order == null)
+            // Initialize the order items grid
+            InitializeDataGrid();
+            
+            if (!_isNewOrder && OrderToEdit != null)
             {
-                // Create new order
-                Order = new Order
-                {
-                    OrderDate = DateTime.Now,
-                    Items = new List<OrderItem>()
-                };
-                _isNewOrder = true;
-                this.Text = "Add New Order";
-            }
-            else
-            {
-                // Edit existing order
-                Order = order;
-                _isNewOrder = false;
-                this.Text = "Edit Order";
+                // Load existing order data
+                dtpOrderDate.Value = OrderToEdit.OrderDate;
+                cmbClient.SelectedValue = OrderToEdit.ClientId;
                 
                 // Load order items
-                _orderItems = Order.Items.ToList();
-            }
-
-            // Setup the items DataGridView
-            _bindingSource.DataSource = _orderItems;
-            dgvOrderItems.DataSource = _bindingSource;
-            
-            // Populate the form with order data if editing
-            if (!_isNewOrder)
-            {
-                cmbClient.SelectedValue = Order.ClientId;
-                dtpOrderDate.Value = Order.OrderDate;
+                LoadOrderItems();
                 
-                // Update the total
-                UpdateTotal();
+                CalculateTotal();
             }
         }
         
@@ -71,11 +64,19 @@ namespace StockManagementApp.Modules
         {
             try
             {
-                var clients = _context.Clients.ToList();
+                var clients = _context.Clients
+                    .OrderBy(c => c.Name)
+                    .Select(c => new {
+                        c.ClientId,
+                        DisplayName = c.Name + (string.IsNullOrEmpty(c.Phone) ? "" : $" ({c.Phone})")
+                    })
+                    .ToList();
                 cmbClient.DataSource = clients;
-                cmbClient.DisplayMember = "Name";
+                cmbClient.DisplayMember = "DisplayName";
                 cmbClient.ValueMember = "ClientId";
                 cmbClient.SelectedIndex = -1;
+
+                if (clients.Count > 0) cmbClient.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -165,7 +166,6 @@ namespace StockManagementApp.Modules
                     var newItem = new OrderItem
                     {
                         ProductId = productId,
-                        Product = product,
                         Quantity = quantity,
                         Price = (decimal)product.Price
                     };
@@ -221,7 +221,7 @@ namespace StockManagementApp.Modules
             }
             
             txtTotal.Text = $"${total:F2}";
-            Order.Total = (decimal)total;
+            OrderToEdit.Total = (decimal)total;
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -243,22 +243,22 @@ namespace StockManagementApp.Modules
                 }
 
                 // Update the order object with form values
-                Order.ClientId = (int)cmbClient.SelectedValue;
-                Order.OrderDate = dtpOrderDate.Value;
+                OrderToEdit.ClientId = (int)cmbClient.SelectedValue;
+                OrderToEdit.OrderDate = dtpOrderDate.Value;
                 
                 // If this is a new order, add the items
                 if (_isNewOrder)
                 {
-                    Order.Items = _orderItems;
+                    OrderToEdit.Items = _orderItems;
                 }
                 // If editing, update the items collection
                 else
                 {
                     // Remove items that are no longer in the order
-                    var itemsToRemove = Order.Items.Where(i => !_orderItems.Any(oi => oi.OrderItemId == i.OrderItemId)).ToList();
+                    var itemsToRemove = OrderToEdit.Items.Where(i => !_orderItems.Any(oi => oi.OrderItemId == i.OrderItemId)).ToList();
                     foreach (var item in itemsToRemove)
                     {
-                        Order.Items.Remove(item);
+                        OrderToEdit.Items.Remove(item);
                     }
                     
                     // Update existing items and add new ones
@@ -267,12 +267,12 @@ namespace StockManagementApp.Modules
                         if (item.OrderItemId == 0)
                         {
                             // This is a new item, add it
-                            Order.Items.Add(item);
+                            OrderToEdit.Items.Add(item);
                         }
                         else
                         {
                             // This is an existing item, update it
-                            var existingItem = Order.Items.FirstOrDefault(i => i.OrderItemId == item.OrderItemId);
+                            var existingItem = OrderToEdit.Items.FirstOrDefault(i => i.OrderItemId == item.OrderItemId);
                             if (existingItem != null)
                             {
                                 existingItem.Quantity = item.Quantity;
@@ -296,7 +296,7 @@ namespace StockManagementApp.Modules
                         // If editing, only deduct the difference
                         else
                         {
-                            var originalItem = Order.Items.FirstOrDefault(i => i.ProductId == item.ProductId);
+                            var originalItem = OrderToEdit.Items.FirstOrDefault(i => i.ProductId == item.ProductId);
                             if (originalItem != null)
                             {
                                 int difference = item.Quantity - originalItem.Quantity;
@@ -314,17 +314,171 @@ namespace StockManagementApp.Modules
                     }
                 }
 
-                DialogResult = DialogResult.OK;
+                // Try to save changes and catch inner exception details
+                try
+                {
+                    _context.SaveChanges();
+                    DialogResult = DialogResult.OK;
+                }
+                catch (Exception ex)
+                {
+                    string errorMsg = ex.Message;
+                    Exception? inner = ex.InnerException;
+                    int depth = 0;
+                    while (inner != null && depth < 5)
+                    {
+                        errorMsg += $"\nInner Exception [{depth + 1}]: {inner.Message}";
+                        inner = inner.InnerException;
+                        depth++;
+                    }
+                    errorMsg += $"\nStack Trace:\n{ex.StackTrace}";
+                    MessageBox.Show($"Error saving order (DB): {errorMsg}", "DB Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Prevent closing the dialog if there is an error
+                    this.DialogResult = DialogResult.None;
+                    return;
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error saving order: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.DialogResult = DialogResult.None;
             }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+        
+        private void InitializeDataGrid()
+        {
+            // Set up the data grid for order items
+            dgvOrderItems.AutoGenerateColumns = false;
+            
+            // Add columns if they don't exist already
+            if (dgvOrderItems.Columns.Count == 0)
+            {
+                dgvOrderItems.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    DataPropertyName = "ProductId",
+                    HeaderText = "Product ID",
+                    Visible = false
+                });
+                
+                dgvOrderItems.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    DataPropertyName = "ProductName",
+                    HeaderText = "Product",
+                    Width = 200,
+                    ReadOnly = true
+                });
+                
+                dgvOrderItems.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    DataPropertyName = "Quantity",
+                    HeaderText = "Quantity",
+                    Width = 80
+                });
+                
+                dgvOrderItems.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    DataPropertyName = "UnitPrice",
+                    HeaderText = "Unit Price",
+                    Width = 100,
+                    DefaultCellStyle = new DataGridViewCellStyle { Format = "C2" }
+                });
+                
+                dgvOrderItems.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    DataPropertyName = "Subtotal",
+                    HeaderText = "Subtotal",
+                    Width = 100,
+                    ReadOnly = true,
+                    DefaultCellStyle = new DataGridViewCellStyle { Format = "C2" }
+                });
+                
+                var deleteColumn = new DataGridViewButtonColumn
+                {
+                    HeaderText = "",
+                    Text = "Remove",
+                    UseColumnTextForButtonValue = true,
+                    Width = 80
+                };
+                dgvOrderItems.Columns.Add(deleteColumn);
+            }
+            
+            // Set up binding source
+            _bindingSource.DataSource = _orderItems;
+            dgvOrderItems.DataSource = _bindingSource;
+        }
+        
+        private void LoadOrderItems()
+        {
+            try
+            {
+                // Clear existing items
+                _orderItems.Clear();
+                
+                // If editing an existing order, load its items
+                if (!_isNewOrder && OrderToEdit != null)
+                {
+                    var orderItems = _context.OrderItems
+                        .Where(oi => oi.OrderId == OrderToEdit.OrderId)
+                        .ToList();
+                        
+                    foreach (var item in orderItems)
+                    {
+                        // Load product separately since Include() isn't working here
+                        var product = _context.Products.Find(item.ProductId);
+                        
+                        _orderItems.Add(new OrderItem
+                        {
+                            OrderItemId = item.OrderItemId,
+                            OrderId = item.OrderId,
+                            ProductId = item.ProductId,
+                            Quantity = item.Quantity,
+                            Price = item.Price,
+                            Product = product
+                        });
+                    }
+                }
+                
+                // Refresh binding
+                _bindingSource.ResetBindings(false);
+                CalculateTotal();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading order items: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        
+        private void CalculateTotal()
+        {
+            decimal total = 0;
+            
+            foreach (var item in _orderItems)
+            {
+                total += item.Quantity * item.Price;
+            }
+            
+            // Update the total label
+            lblTotal.Text = $"Total: ${total:F2}";
+            
+            // Update the order total
+            if (OrderToEdit != null)
+            {
+                OrderToEdit.Total = total;
+            }
         }
     }
 }

@@ -8,11 +8,12 @@ namespace StockManagementApp.Modules
 {
     public partial class ProductsControl : UserControl
     {
-        private StockContext _context = new StockContext();
+        private StockContext _context;
 
         public ProductsControl()
         {
             InitializeComponent();
+            _context = DbContextFactory.CreateContext();
             LoadProducts();
             CheckLowStockAndExpiryAlerts();
         }
@@ -298,23 +299,35 @@ namespace StockManagementApp.Modules
         {
             try
             {
-                // For now, we'll log with a default user ID of 1
-                // In a real app, you would use the current logged in user's ID
-                var historyEntry = new History
+                // Get the current user ID from the parent form
+                var mainForm = this.FindForm() as Form1;
+                if (mainForm != null && mainForm.CurrentUser != null)
                 {
-                    Action = actionDescription,
-                    Date = DateTime.Now,
-                    UserId = 1
-                };
-                
-                _context.Histories.Add(historyEntry);
-                _context.SaveChanges();
+                    var historyEntry = new History
+                    {
+                        Action = actionDescription,
+                        Date = DateTime.Now,
+                        UserId = mainForm.CurrentUser.UserId
+                    };
+                    
+                    _context.Histories.Add(historyEntry);
+                    _context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
                 // Just log the error but don't stop the workflow
-                Console.WriteLine($"Error logging action: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error logging action: {ex.Message}");
             }
+        }
+        
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

@@ -8,11 +8,12 @@ namespace StockManagementApp.Modules
 {
     public partial class ClientsControl : UserControl
     {
-        private StockContext _context = new StockContext();
+        private StockContext _context;
 
         public ClientsControl()
         {
             InitializeComponent();
+            _context = DbContextFactory.CreateContext();
             LoadClients();
         }
 
@@ -227,6 +228,15 @@ namespace StockManagementApp.Modules
             {                // Just log to console for now, don't disrupt the UI
                 System.Diagnostics.Debug.WriteLine($"Error logging action: {ex.Message}");
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

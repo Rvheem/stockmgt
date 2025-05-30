@@ -15,13 +15,13 @@ namespace StockManagementApp.Modules
         private void InitializeComponent()
         {
             this.dataGridViewOrders = new System.Windows.Forms.DataGridView();
-            this.btnAdd = new System.Windows.Forms.Button();
             this.btnEdit = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnPrint = new System.Windows.Forms.Button();
             this.btnStats = new System.Windows.Forms.Button();
+            this.btnAdd = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewOrders)).BeginInit();
             this.SuspendLayout();
             // 
@@ -35,14 +35,6 @@ namespace StockManagementApp.Modules
             this.dataGridViewOrders.Name = "dataGridViewOrders";
             this.dataGridViewOrders.Size = new System.Drawing.Size(740, 350);
             this.dataGridViewOrders.TabIndex = 0;
-            // 
-            // btnAdd
-            // 
-            this.btnAdd.Location = new System.Drawing.Point(20, 420);
-            this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(80, 30);
-            this.btnAdd.Text = "Add";
-            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
             // btnEdit
             // 
@@ -74,9 +66,17 @@ namespace StockManagementApp.Modules
             this.btnSearch.Text = "Search";
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
+            // btnAdd
+            // 
+            this.btnAdd.Location = new System.Drawing.Point(620, 18);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(80, 27);
+            this.btnAdd.Text = "Add Order";
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
             // btnPrint
             // 
-            this.btnPrint.Location = new System.Drawing.Point(620, 18);
+            this.btnPrint.Location = new System.Drawing.Point(710, 18); // Move right of Add
             this.btnPrint.Name = "btnPrint";
             this.btnPrint.Size = new System.Drawing.Size(70, 27);
             this.btnPrint.Text = "Print";
@@ -84,22 +84,22 @@ namespace StockManagementApp.Modules
             // 
             // btnStats
             // 
-            this.btnStats.Location = new System.Drawing.Point(700, 18);
+            this.btnStats.Location = new System.Drawing.Point(790, 18); // Move right of Print
             this.btnStats.Name = "btnStats";
             this.btnStats.Size = new System.Drawing.Size(60, 27);
             this.btnStats.Text = "Stats";
             this.btnStats.Click += new System.EventHandler(this.btnStats_Click);
-            //            // OrdersControl
+            // 
+            // OrdersControl
             // 
             this.Controls.Add(this.dataGridViewOrders);
-            this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.btnEdit);
             this.Controls.Add(this.btnDelete);
             this.Controls.Add(this.txtSearch);
             this.Controls.Add(this.btnSearch);
             this.Controls.Add(this.btnPrint);
             this.Controls.Add(this.btnStats);
-            this.Controls.Add(this.btnStats);
+            this.Controls.Add(this.btnAdd);
             this.Size = new System.Drawing.Size(780, 470);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewOrders)).EndInit();
             this.ResumeLayout(false);

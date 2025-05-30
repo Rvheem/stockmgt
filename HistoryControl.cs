@@ -8,11 +8,12 @@ namespace StockManagementApp.Modules
 {
     public partial class HistoryControl : UserControl
     {
-        private StockContext _context = new StockContext();
+        private StockContext _context;
 
         public HistoryControl()
         {
             InitializeComponent();
+            _context = DbContextFactory.CreateContext();
             LoadHistory();
         }
 
@@ -179,6 +180,15 @@ namespace StockManagementApp.Modules
             {
                 MessageBox.Show($"Error exporting history: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

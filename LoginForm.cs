@@ -9,61 +9,65 @@ namespace StockManagementApp
     public partial class LoginForm : Form
     {
         private StockContext _context = new StockContext();
+        
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public User User { get; private set; }
+        public User User { get; private set; } = new User { 
+            Username = string.Empty, 
+            Password = string.Empty, 
+            FullName = string.Empty, 
+            Role = string.Empty 
+        };
 
         public LoginForm()
         {
             InitializeComponent();
         }
 
-
-private void btnLogin_Click(object sender, EventArgs e)
-{
-    try
-    {
-        string username = txtUsername.Text.Trim();
-        string password = txtPassword.Text;
-        
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+        private void btnLogin_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Please enter both username and password.", "Login Error", 
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
-        // Case-insensitive username check
-        var user = _context.Users
-            .FirstOrDefault(u => u.Username.ToLower() == username.ToLower() && u.Password == password);
-
-        if (user != null)
-        {
-            User = user;
-            
-            // Log the login action
-            _context.Histories.Add(new History
+            try
             {
-                UserId = user.UserId,
-                Action = "User logged in",
-                Date = DateTime.Now
-            });
-            _context.SaveChanges();
-            
-            DialogResult = DialogResult.OK;
-        }
-        else
-        {
-            MessageBox.Show("Invalid username or password.", "Login Error", 
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-    catch (Exception ex)
-    {
-        MessageBox.Show($"Login error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    }
-}
+                string username = txtUsername.Text.Trim();
+                string password = txtPassword.Text;
+                
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+                {
+                    MessageBox.Show("Please enter both username and password.", "Login Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
+                // Case-insensitive username check
+                var user = _context.Users
+                    .FirstOrDefault(u => u.Username.ToLower() == username.ToLower() && u.Password == password);
+
+                if (user != null)
+                {
+                    User = user;
+                    
+                    // Log the login action
+                    _context.Histories.Add(new History
+                    {
+                        UserId = user.UserId,
+                        Action = "User logged in",
+                        Date = DateTime.Now
+                    });
+                    _context.SaveChanges();
+                    
+                    DialogResult = DialogResult.OK;
+                }
+                else
+                {
+                    MessageBox.Show("Invalid username or password.", "Login Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Login error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {

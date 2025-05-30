@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Windows.Forms;
 using StockManagementApp.Models;
 using System.ComponentModel;
@@ -11,10 +10,14 @@ namespace StockManagementApp.Modules
         private StockContext _context = new StockContext();
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Product Product { get; private set; }
+        public Product? ProductToEdit { get; set; } = null;
         private bool _isNewProduct;
 
-        public ProductEditForm(Product product = null)
+        // Add this property to fix the error
+        public Product Product => ProductToEdit ?? new Product();
+        
+        // Fix by properly handling the nullable parameter
+        public ProductEditForm(Product? product = null)
         {
             InitializeComponent();
             
@@ -22,7 +25,7 @@ namespace StockManagementApp.Modules
             LoadSuppliers();
             
             // Initialize with a new product if null was passed
-            Product = product ?? new Product();
+            ProductToEdit = product ?? new Product();
             
             if (product == null)
             {
@@ -40,17 +43,17 @@ namespace StockManagementApp.Modules
             // Populate the form with product data if editing
             if (!_isNewProduct)
             {
-                txtName.Text = Product.Name;
-                txtReference.Text = Product.Reference;
-                numQuantity.Value = Product.Quantity;
-                numThreshold.Value = Product.Threshold;
-                numPrice.Value = (decimal)Product.Price;
-                dtpExpiryDate.Value = Product.ExpiryDate ?? DateTime.Now.AddYears(1);
-                dtpExpiryDate.Checked = Product.ExpiryDate.HasValue;
+                txtName.Text = ProductToEdit.Name;
+                txtReference.Text = ProductToEdit.Reference;
+                numQuantity.Value = ProductToEdit.Quantity;
+                numThreshold.Value = ProductToEdit.Threshold;
+                numPrice.Value = (decimal)ProductToEdit.Price;
+                dtpExpiryDate.Value = ProductToEdit.ExpiryDate ?? DateTime.Now.AddYears(1);
+                dtpExpiryDate.Checked = ProductToEdit.ExpiryDate.HasValue;
                 
-                if (Product.SupplierId.HasValue)
+                if (ProductToEdit.SupplierId.HasValue)
                 {
-                    cmbSupplier.SelectedValue = Product.SupplierId.Value;
+                    cmbSupplier.SelectedValue = ProductToEdit.SupplierId.Value;
                 }
             }
         }
@@ -91,20 +94,20 @@ namespace StockManagementApp.Modules
                 }
 
                 // Update the product object with form values
-                Product.Name = txtName.Text;
-                Product.Reference = txtReference.Text;
-                Product.Quantity = (int)numQuantity.Value;
-                Product.Threshold = (int)numThreshold.Value;
-                Product.Price = (decimal)numPrice.Value;
-                Product.ExpiryDate = dtpExpiryDate.Checked ? dtpExpiryDate.Value : (DateTime?)null;
+                ProductToEdit.Name = txtName.Text;
+                ProductToEdit.Reference = txtReference.Text;
+                ProductToEdit.Quantity = (int)numQuantity.Value;
+                ProductToEdit.Threshold = (int)numThreshold.Value;
+                ProductToEdit.Price = (decimal)numPrice.Value;
+                ProductToEdit.ExpiryDate = dtpExpiryDate.Checked ? dtpExpiryDate.Value : (DateTime?)null;
                 
                 if (cmbSupplier.SelectedValue != null)
                 {
-                    Product.SupplierId = (int)cmbSupplier.SelectedValue;
+                    ProductToEdit.SupplierId = (int)cmbSupplier.SelectedValue;
                 }
                 else
                 {
-                    Product.SupplierId = null;
+                    ProductToEdit.SupplierId = null;
                 }
 
                 DialogResult = DialogResult.OK;

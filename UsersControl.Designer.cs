@@ -70,6 +70,14 @@ namespace StockManagementApp.Modules
             this.btnSearch.Text = "Search";
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
+            // btnAdd
+            // 
+            this.btnAdd.Location = new System.Drawing.Point(620, 18);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(80, 27);
+            this.btnAdd.Text = "Add User";
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
             // UsersControl
             // 
             this.Controls.Add(this.dataGridViewUsers);
