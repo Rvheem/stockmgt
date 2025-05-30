@@ -32,14 +32,13 @@ namespace StockManagementApp.Modules
             this.dataGridViewSuppliers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridViewSuppliers.Size = new System.Drawing.Size(760, 350);
             this.dataGridViewSuppliers.TabIndex = 0;
+            //            // btnEdit
             // 
-            // btnEdit
-            // 
-            this.btnEdit.Location = new System.Drawing.Point(120, 20);
+            this.btnEdit.Location = new System.Drawing.Point(110, 420);
             this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(75, 30);
-            this.btnEdit.TabIndex = 2;
-            this.btnEdit.Text = "Modify";
+            this.btnEdit.Size = new System.Drawing.Size(80, 30);
+            this.btnEdit.TabIndex = 4;
+            this.btnEdit.Text = "Edit";
             this.btnEdit.UseVisualStyleBackColor = true;
             this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
             // 
@@ -66,13 +65,14 @@ namespace StockManagementApp.Modules
             this.btnSearch.TabIndex = 2;
             this.btnSearch.Text = "Search";
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
+            //            // btnAdd
             // 
-            // btnAdd
-            // 
-            this.btnAdd.Location = new System.Drawing.Point(370, 20);
+            this.btnAdd.Location = new System.Drawing.Point(20, 420);
             this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(80, 23);
-            this.btnAdd.Text = "Add Supplier";
+            this.btnAdd.Size = new System.Drawing.Size(80, 30);
+            this.btnAdd.TabIndex = 3;
+            this.btnAdd.Text = "Add";
+            this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
             // SuppliersControl
