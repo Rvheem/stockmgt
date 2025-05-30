@@ -49,21 +49,20 @@ namespace StockManagementApp.Modules
             this.btnDelete.Size = new System.Drawing.Size(80, 30);
             this.btnDelete.Text = "Delete";
             this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
-            // 
-            // txtSearch
+            //            // txtSearch
             // 
             this.txtSearch.Location = new System.Drawing.Point(20, 20);
             this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(250, 23);
+            this.txtSearch.Size = new System.Drawing.Size(200, 23);
             this.txtSearch.TabIndex = 1;
+            //            // btnSearch
             // 
-            // btnSearch
-            // 
-            this.btnSearch.Location = new System.Drawing.Point(280, 20);
+            this.btnSearch.Location = new System.Drawing.Point(230, 20);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(80, 23);
             this.btnSearch.TabIndex = 2;
             this.btnSearch.Text = "Search";
+            this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             //            // btnAdd
             // 

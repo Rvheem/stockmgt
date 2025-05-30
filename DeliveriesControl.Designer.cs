@@ -35,7 +35,7 @@ namespace StockManagementApp.Modules
             this.dataGridViewDeliveries.TabIndex = 0;
             //            // btnEdit
             // 
-            this.btnEdit.Location = new System.Drawing.Point(530, 420);
+            this.btnEdit.Location = new System.Drawing.Point(110, 420);
             this.btnEdit.Name = "btnEdit";
             this.btnEdit.Size = new System.Drawing.Size(80, 30);
             this.btnEdit.Text = "Edit";
@@ -79,8 +79,7 @@ namespace StockManagementApp.Modules
             this.btnUpdateStatus.Size = new System.Drawing.Size(120, 30);
             this.btnUpdateStatus.Text = "Update Status";
             this.btnUpdateStatus.Click += new System.EventHandler(this.btnUpdateStatus_Click);
-            // 
-            // DeliveriesControl
+            //            // DeliveriesControl
             // 
             this.Controls.Add(this.dataGridViewDeliveries);
             this.Controls.Add(this.btnEdit);
