@@ -35,10 +35,12 @@ namespace StockManagementApp.Modules
             // 
             // btnEdit
             // 
-            this.btnEdit.Location = new System.Drawing.Point(110, 420);
+            this.btnEdit.Location = new System.Drawing.Point(120, 20);
             this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(80, 30);
-            this.btnEdit.Text = "Edit";
+            this.btnEdit.Size = new System.Drawing.Size(75, 30);
+            this.btnEdit.TabIndex = 2;
+            this.btnEdit.Text = "Modify";
+            this.btnEdit.UseVisualStyleBackColor = true;
             this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
             // 
             // btnDelete
