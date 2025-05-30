@@ -45,7 +45,7 @@ static class Program
             context.Users.Add(new StockManagementApp.Models.User
             {
                 Username = "admin",
-                PasswordHash = "admin", // In production, hash this!
+                Password = "admin", // In production, hash this!
                 Role = "Administrator"
             });
             context.SaveChanges();

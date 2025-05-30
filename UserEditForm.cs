@@ -75,12 +75,12 @@ namespace StockManagementApp.Modules
                 if (!string.IsNullOrWhiteSpace(txtPassword.Text))
                 {
                     // In a real application, you would hash the password
-                    User.PasswordHash = txtPassword.Text;
+                    User.Password = txtPassword.Text;
                 }
                 
                 // When saving a user
                 User.Username = txtUsername.Text;
-                User.PasswordHash = txtPassword.Text; // (if provided)
+                User.Password = txtPassword.Text; // (if provided)
                 User.Role = cmbRole.Text;
 
                 DialogResult = DialogResult.OK;

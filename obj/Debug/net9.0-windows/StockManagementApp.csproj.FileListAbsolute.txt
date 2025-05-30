@@ -132,3 +132,4 @@ C:\Users\abder\Desktop\ccharp\bin\Debug\net9.0-windows\runtimes\win-x86\native\M
 C:\Users\abder\Desktop\ccharp\bin\Debug\net9.0-windows\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 C:\Users\abder\Desktop\ccharp\obj\Debug\net9.0-windows\StockManagementApp.csproj.AssemblyReference.cache
 C:\Users\abder\Desktop\ccharp\obj\Debug\net9.0-windows\StockMan.EC9BCD68.Up2Date
+C:\Users\abder\Desktop\ccharp\obj\Debug\net9.0-windows\StockManagementApp.sourcelink.json

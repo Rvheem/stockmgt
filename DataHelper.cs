@@ -16,7 +16,7 @@ namespace StockManagementApp
             {
                 // This also uses Username, not Email
                 return context.Users
-                    .FirstOrDefault(u => u.Username == username && u.PasswordHash == password);
+                    .FirstOrDefault(u => u.Username == username && u.Password == password);
             }
         }
         

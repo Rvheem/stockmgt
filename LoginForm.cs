@@ -35,7 +35,7 @@ private void btnLogin_Click(object sender, EventArgs e)
 
         // Case-insensitive username check
         var user = _context.Users
-            .FirstOrDefault(u => u.Username.ToLower() == username.ToLower() && u.PasswordHash == password);
+            .FirstOrDefault(u => u.Username.ToLower() == username.ToLower() && u.Password == password);
 
         if (user != null)
         {
