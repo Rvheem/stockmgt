@@ -222,6 +222,41 @@ namespace StockManagementApp.Modules
             }
         }
         
+        private void btnDetails_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dataGridViewDeliveries.CurrentRow != null)
+                {
+                    int id = (int)dataGridViewDeliveries.CurrentRow.Cells["DeliveryId"].Value;
+                    var delivery = _context.Deliveries
+                        .Include(d => d.Order)
+                        .ThenInclude(o => o.Client)
+                        .Include(d => d.Order)
+                        .ThenInclude(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Product)
+                        .FirstOrDefault(d => d.DeliveryId == id);
+                    
+                    if (delivery != null)
+                    {
+                        // Show delivery details in a form or dialog
+                        MessageBox.Show(
+                            $"Delivery #{delivery.DeliveryId}\n" +
+                            $"Date: {delivery.DeliveryDate:d}\n" +
+                            $"Status: {delivery.Status}\n" +
+                            $"Order #: {delivery.OrderId}\n" +
+                            $"Client: {delivery.Order.Client.Name}\n" +
+                            $"Items: {delivery.Order.OrderItems.Count}", 
+                            "Delivery Details", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error showing delivery details: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        
         private void LogAction(string action)
         {
             try
@@ -246,15 +281,6 @@ namespace StockManagementApp.Modules
                 // Just log to console for now, don't disrupt the UI
                 System.Diagnostics.Debug.WriteLine($"Error logging action: {ex.Message}");
             }
-        }
-        
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _context?.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }
