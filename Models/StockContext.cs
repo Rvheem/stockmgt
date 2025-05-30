@@ -83,6 +83,11 @@ namespace StockManagementApp.Models
                     IsActive = true,
                 }
             );
+
+            // Add unique constraint for Username
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username)
+                .IsUnique();
         }
     }
 }

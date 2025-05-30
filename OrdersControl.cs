@@ -69,9 +69,11 @@ namespace StockManagementApp.Modules
                     _context.Orders.Add(form.Order);
                     _context.SaveChanges();
                     LoadOrders();
-                    
-                    // Log the action in history
-                    LogAction($"Added order #{form.Order.OrderId} for client: {form.Order.Client.Name}");
+
+                    // Reload the order with client info for logging
+                    var addedOrder = _context.Orders.Include(o => o.Client).OrderByDescending(o => o.OrderId).FirstOrDefault();
+                    string clientName = addedOrder?.Client?.Name ?? "Unknown";
+                    LogAction($"Added order #{addedOrder?.OrderId ?? 0} for client: {clientName}");
                 }
             }
             catch (Exception ex)

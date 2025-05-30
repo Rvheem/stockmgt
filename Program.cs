@@ -54,7 +54,9 @@ static class Program
                 {
                     Username = "admin",
                     Password = "admin", // In production, hash this!
-                    Role = "Administrator"
+                    Role = "Administrator",
+                    FullName = "System Administrator", // Added required field
+                    IsActive = true // Added required field
                 });
                 context.SaveChanges();
             }

@@ -66,19 +66,55 @@ namespace StockManagementApp.Modules
                 }
                 
                 var form = new UserEditForm();
-                if (form.ShowDialog() == DialogResult.OK)
+                if (form.ShowDialog() == DialogResult.OK && form.UserToEdit != null)
                 {
-                    _context.Users.Add(form.User);
-                    _context.SaveChanges();
-                    LoadUsers();
+                    // Validate username uniqueness before adding
+                    if (_context.Users.Any(u => u.Username == form.UserToEdit.Username))
+                    {
+                        MessageBox.Show($"A user with username '{form.UserToEdit.Username}' already exists. Please choose a different username.", 
+                            "Duplicate Username", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
                     
-                    // Log the action in history
-                    LogAction($"Added user: {form.User.Username}");
+                    _context.Users.Add(form.UserToEdit);
+                    
+                    try 
+                    {
+                        _context.SaveChanges();
+                        LoadUsers();
+                        
+                        // Log the action in history
+                        LogAction($"Added user: {form.UserToEdit.Username}");
+                    }
+                    catch (DbUpdateException dbEx)
+                    {
+                        var innerEx = dbEx.InnerException;
+                        string errorMsg = "Database error while adding user: ";
+                        
+                        if (innerEx != null)
+                        {
+                            if (innerEx.Message.Contains("UNIQUE") || innerEx.Message.Contains("duplicate"))
+                            {
+                                errorMsg += "A user with the same username already exists.";
+                            }
+                            else
+                            {
+                                errorMsg += innerEx.Message;
+                            }
+                        }
+                        else
+                        {
+                            errorMsg += dbEx.Message;
+                        }
+                        
+                        MessageBox.Show(errorMsg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error adding user: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error adding user: {ex.Message}\n\nStack Trace: {ex.StackTrace}", 
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

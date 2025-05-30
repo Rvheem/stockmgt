@@ -12,51 +12,42 @@ namespace StockManagementApp.Modules
         [System.ComponentModel.Browsable(false)]
         [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public User? UserToEdit { get; set; }
-        
-        public User User => UserToEdit ?? new User 
-        { 
-            Username = "newuser", 
-            Password = "password", 
-            FullName = "New User", 
-            Role = "User" 
-        };
-        
-        private bool _isNewUser;
-        
-
-        // Remove these fields, as they are already defined in the Designer file
-        // private TextBox txtUsername = new TextBox();
-        // private ComboBox cmbRole = new ComboBox();
-        // private TextBox txtPassword = new TextBox();
-
-        // Keep only the extra fields not present in the Designer
-        private TextBox txtFullName = new TextBox();
-        private CheckBox chkActive = new CheckBox();
-        private Label lblConfirmPassword = new Label();
-        private TextBox txtConfirmPassword = new TextBox();
-
+          [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public User User => UserToEdit;
+          private bool _isNewUser;        // All form controls are defined in the Designer file
+        // No need to redefine them here
         public UserEditForm()
         {
             InitializeComponent();
             _context = DbContextFactory.CreateContext();
             _isNewUser = true;
-            UserToEdit = new User();
-            // Minimal initialization for controls to avoid null reference errors
+            
+            // Initialize with default values for required fields
+            UserToEdit = new User 
+            { 
+                Username = "", 
+                Password = "", 
+                FullName = "", 
+                Role = "User",
+                IsActive = true
+            };
+              // Initialize form controls
             txtFullName.Text = "";
             chkActive.Checked = true;
+            txtUsername.Text = "";
+            txtPassword.Text = "";
+            txtConfirmPassword.Text = "";
+            
+            // Ensure confirm password fields are visible for new users
             lblConfirmPassword.Visible = true;
             txtConfirmPassword.Visible = true;
-            txtUsername.Text = "";
-            cmbRole.Items.AddRange(new string[] { "Administrator", "Manager", "User" });
-            cmbRole.SelectedIndex = 0;
-            txtPassword.Text = "";
+            
             LoadRoles();
-        }
-
-        public UserEditForm(User? user)
+        }        public UserEditForm(User? user)
         {
             InitializeComponent();
-            _context = new StockContext();
+            _context = DbContextFactory.CreateContext(); // Use factory for consistent context creation
             
             // Create new user or use existing one
             if (user == null)
@@ -79,13 +70,12 @@ namespace StockManagementApp.Modules
                 _isNewUser = false;
                 this.Text = "Edit User";
             }
+              LoadRoles();
             
-            LoadRoles();
-            
-            if (!_isNewUser && UserToEdit != null)
+            if (UserToEdit != null)
             {
                 txtUsername.Text = UserToEdit.Username;
-                txtFullName.Text = UserToEdit.FullName;
+                txtFullName.Text = UserToEdit.FullName ?? "";
                 cmbRole.Text = UserToEdit.Role;
                 chkActive.Checked = UserToEdit.IsActive;
                 
@@ -119,11 +109,37 @@ namespace StockManagementApp.Modules
                     txtUsername.Focus();
                     return;
                 }
-
+                
+                // Check if username is unique (only for new users or when username changed)
+                bool usernameChanged = !_isNewUser && UserToEdit.Username != txtUsername.Text;
+                if ((_isNewUser || usernameChanged) && _context.Users.Any(u => u.Username == txtUsername.Text))
+                {
+                    MessageBox.Show($"A user with username '{txtUsername.Text}' already exists. Please choose a different username.", 
+                        "Duplicate Username", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtUsername.Focus();
+                    return;
+                }
+                
                 if (_isNewUser && string.IsNullOrWhiteSpace(txtPassword.Text))
                 {
                     MessageBox.Show("Password is required for new users.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtPassword.Focus();
+                    return;
+                }
+
+                // Check if password and confirmed password match for new users
+                if (_isNewUser && txtPassword.Text != txtConfirmPassword.Text)
+                {
+                    MessageBox.Show("Password and confirm password do not match.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtConfirmPassword.Focus();
+                    return;
+                }
+
+                // Validate full name
+                if (string.IsNullOrWhiteSpace(txtFullName.Text))
+                {
+                    MessageBox.Show("Full name is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtFullName.Focus();
                     return;
                 }
 
@@ -133,9 +149,12 @@ namespace StockManagementApp.Modules
                     cmbRole.Focus();
                     return;
                 }
-
+                
                 // Update the user object with form values
                 UserToEdit.Username = txtUsername.Text;
+                UserToEdit.Role = cmbRole.Text;
+                UserToEdit.FullName = txtFullName.Text;
+                UserToEdit.IsActive = chkActive.Checked;
                 
                 // Only update password if provided (for editing existing users)
                 if (!string.IsNullOrWhiteSpace(txtPassword.Text))
@@ -143,17 +162,20 @@ namespace StockManagementApp.Modules
                     // In a real application, you would hash the password
                     UserToEdit.Password = txtPassword.Text;
                 }
-                
-                // When saving a user
-                UserToEdit.Username = txtUsername.Text;
-                UserToEdit.Password = txtPassword.Text; // (if provided)
-                UserToEdit.Role = cmbRole.Text;
+                else if (_isNewUser)
+                {
+                    // Ensure new users always have a password
+                    MessageBox.Show("Password is required for new users.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtPassword.Focus();
+                    return;
+                }
 
                 DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving user: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error saving user: {ex.Message}\n\nStack Trace: {ex.StackTrace}", 
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
